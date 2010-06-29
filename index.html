@@ -1,0 +1,178 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/> 
+    <title>animeiosis</title> 
+    <link rel="stylesheet" href="animeiosis-demo.css" type="text/css" media="screen"> 
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="raphael.js"></script> 
+    <script type="text/javascript" charset="utf-8"> 
+        $(function () {
+            var $canvas = Raphael("canvas", 700, 675),
+                $run    = $("#run"),
+                $code   = $("#code");
+        
+            $run.click(function () {
+            
+              $canvas.clear();
+              $canvas.rect(0, 0, 700, 675, 10).attr({fill: "#fff", stroke: "none"});
+              try {
+                  (new Function("$canvas", "window", "document", $code.val() )).call($canvas, $canvas);
+              } catch (e) {
+                  console.log(e);
+              }
+            });
+            
+            
+            $run.trigger('click');
+            
+            
+            $(document).bind('keydown', function (event) {
+              if ( event.ctrlKey && event.which === 13 ) {
+                $run.trigger('click');  
+              }
+            });
+            
+        });
+    </script> 
+</head> 
+<body> 
+<div style="float:left">
+<textarea id="code">
+(function($canvas) {
+  var 
+  //  STORE DEFAULT CELL ATTRS
+  cellAttrs = {
+    fill: "#E0E4CD", 
+    stroke: "#000", 
+    "stroke-width": 2
+  },
+  //  SET UP CELL ARRAY 
+  $cells    = [],
+  //  DRAW INITIAL CELL
+  $cell     = $canvas.circle(  /* coordX, coordY, radius */
+                  $('#canvas').width() / 2  ,
+                  100 ,                      
+                  20                         
+                ).attr(cellAttrs),
+  coordDist = {
+    x:  0, 
+    y:  0
+  },
+  aniMeiosis  = {
+    sequences:    2, 
+    atSequence:   0,
+    cache:        function (cell, fn) {
+      
+      //  CACHE CELL
+      $cells.push(cell);
+      
+      //  IF CALLBACK, FIRE IT
+      if  ( fn && $.isFunction(fn)  ) {
+        fn.call(this);
+      }
+    },
+    phase:  {
+      inter: {
+        ms:  2000,
+        fn:  function () {
+
+          //  INCREMENET
+          aniMeiosis.atSequence++;
+
+          $.each($cells, function (i, _cell) {
+
+            _cell.animate({
+                fill: "#E0E4CD", 
+                stroke: "#000", 
+                "stroke-width": 80, 
+                "stroke-opacity": 0.5
+              }, 
+              aniMeiosis.phase.inter.ms, 
+              function () {
+
+                aniMeiosis.phase.telo.fn();
+
+            });  
+          });
+        }          
+      }, 
+      pro: {
+        ms:  1000,
+        fn:  function () {
+        }
+      },
+      proMeta:   {
+        ms:  1000,
+        fn:  function () {
+        }
+      },
+      meta:      {
+        ms:  1000,
+        fn:  function () {
+        }
+      },
+      ana:       {
+        ms:  1000,
+        fn:  function () {
+        }
+      },
+      telo:      {
+        ms:  1000,
+        fn:  function () {
+
+          //  CLONE EXISTING CELLS
+          $.each($cells, function (i, _cell) {
+
+            aniMeiosis.cache(_cell.clone());
+            //$cells.push(_cell.clone());
+          });
+
+          //  SETUP CELL POSITIONS BASED ON 
+          //  EXISTING NUMBER OF CELLS
+          var cellCount   = $cells.length,
+              cellOffPos  = cellCount + 1;
+
+          //  SET CELL HORIZONTAL DISTANCE INCREMENT
+          coordDist['x']  = Math.round( $canvas.width / cellOffPos );
+
+          //  ANIMATE MEIOSIS
+          $.each($cells, function (i, _cell) {
+
+            //  DETERMINE THIS CELLS NEW LOCATION
+            cellAttrs['cx'] = coordDist['x'] * ( i + 1 );
+
+            //  PERFORM MEIOSIS ANIMATION
+            _cell.animate(cellAttrs, aniMeiosis.phase.telo.ms);
+          });
+
+          //  LIMIT NUMBER OF PHASES ALLOWED
+          if ( aniMeiosis.atSequence < aniMeiosis.sequences ) {
+
+            //  RESTART NEXT phase.inter AFTER
+            //  ALL MEIOSIS ARE COMPLETED
+            setTimeout(function () {
+
+              aniMeiosis.phase.inter.fn();
+
+            }, ( aniMeiosis.phase.telo.ms * cellCount ) / 2 );
+          } 
+        }          
+      }
+    }
+  };
+
+  aniMeiosis.cache($cell, function () {
+    aniMeiosis.phase.inter.fn();
+  });
+
+})($canvas);
+</textarea>
+  <br>
+  <button id="run" type="button">Run</button>
+</div> 
+<div style="float:left;margin-left:10px"><div id="canvas"></div> </div>
+    
+    
+</body> 
+</html> 

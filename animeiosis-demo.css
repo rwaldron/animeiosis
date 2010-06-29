@@ -1,0 +1,26 @@
+body {
+    background: #333;
+    color: #fff;
+    font: 300 100.1% "Helvetica Neue", Helvetica, "Arial Unicode MS", Arial, sans-serif;
+    padding: 0;
+}
+h1 {
+  font-weight: 400;
+  height: 5%;
+}
+#canvas {
+  height: 675px;
+  /*margin: 0 auto;*/
+  text-align: left;
+  width: 700px;
+}
+#code {
+  font-family: Consolas, Monaco, "Lucida Console", monospace;
+  height: 675px;
+  font-size: 1em;
+  padding: 0;
+  width: 40em;
+}
+#run {
+  font-size: 2em;
+}
